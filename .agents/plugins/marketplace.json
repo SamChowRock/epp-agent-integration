@@ -1,0 +1,12 @@
+{
+  "name": "epp-local",
+  "interface": { "displayName": "EPP 本地插件" },
+  "plugins": [
+    {
+      "name": "epp",
+      "source": { "source": "local", "path": "./plugins/epp" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "epp": {
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp",
+      "oauth": {
+        "clientId": "epp-codex-local",
+        "callbackPort": 8767,
+        "callbackUrl": "http://127.0.0.1:8767/callback/fwqfvb1UgHvX"
+      }
+    }
+  }
+}

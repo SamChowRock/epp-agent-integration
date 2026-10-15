@@ -1,0 +1,22 @@
+{
+  "name": "epp",
+  "version": "0.1.2",
+  "description": "由 Agent 自身 AI 整理、润色和练习英语表达。支持确认记录、出题、原答案评估、提示、自评和恢复。",
+  "author": { "name": "EPP" },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "EPP",
+    "shortDescription": "在 Agent 中记录并练习英语表达",
+    "longDescription": "连接用户配置的本地或线上 EPP 服务。Agent 自身 AI 润色候选，经你的明确选择后采纳入图；支持每批最多 20 条、补充、修改和恢复。练习一次一道题，保存原始答案，由 Agent 评估并独立核对表达用法。提示使用先记录，自评由你选择。使用练习前须在目标服务重新授权练习权限。",
+    "developerName": "EPP",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "用 EPP 记录并润色这个英语表达，先展示候选，等我确认后采纳。",
+      "把这批英语表达记录到 EPP，保留每条来源并让我选择要采纳的项。",
+      "用 EPP 练习我已经收录的表达，一次一道题，保存我的原始答案并评估。",
+      "恢复我在 EPP 的这次练习，先读取已保存状态，再继续。"
+    ]
+  }
+}

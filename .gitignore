@@ -1,0 +1,14 @@
+.local/
+.env*
+user-config.json
+credentials.json
+token.json
+tokens.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
+node_modules/
+dist/
+coverage/

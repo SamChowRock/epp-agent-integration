@@ -2,7 +2,7 @@
 
 在 Agent 对话中记录并练习英语表达。Agent 自身 AI 整理和润色候选、出题、评估原始答案；EPP 服务保存记录、校验结果，并在用户确认后采纳候选与处理掌握证据。
 
-本分发包公开插件、两个 Skill、MCP 连接配置及配置脚本。EPP 核心和 MCP 服务端独立运行，源码不随包提供；安装插件不会安装 EPP 服务、创建账号或开放服务访问权。使用前需要管理员提供可访问的 EPP 服务、账号及已预登记的 OAuth 客户端。
+本源码包含插件、记录/练习/随机练习三个 Skill、MCP 连接配置及配置脚本。EPP 核心和 MCP 服务端独立运行，源码不随包提供；安装插件不会安装 EPP 服务、创建账号或开放服务访问权。使用前需要管理员提供可访问的 EPP 服务、账号及已预登记的 OAuth 客户端。
 
 ## 环境与验证范围
 
@@ -59,7 +59,7 @@ OAuth 账号密码和令牌由宿主认证机制保存，不写入用户 JSON、
 
 ## Codex 随机练习配置
 
-当前公开分发包含记录与练习两个 Skill，尚未包含 `schedule-practice` Skill 和随机时段脚本。下面是随机练习扩展的配置参考，不会自行注册 Schedule，也不能直接写入用于服务连接的 `user-config.json`。只在任务提示中写“随机提醒”，不能保证每天的次数或避免重复。
+随机练习入口为源码根目录下的 `plugins/epp/skills/schedule-practice/SKILL.md`，其目录同时包含非秘密配置样例与随机时段脚本。以下命令从源码根目录运行。本扩展不会自行注册 Schedule，随机时间配置也不能直接写入用于服务连接的 `user-config.json`。只在任务提示中写“随机提醒”，不能保证每天的次数或避免重复。
 
 ```json
 {
@@ -69,7 +69,15 @@ OAuth 账号密码和令牌由宿主认证机制保存，不写入用户 JSON、
 }
 ```
 
-具备随机调度扩展后，按以下规则在支持插件的 Codex 宿主中配置任务；定时任务入口见 [Scheduled tasks 官方说明](https://learn.chatgpt.com/docs/automations?surface=app)。
+先用 Node.js 22 或更新版本运行本地检查；示例状态路径由公开根目录的 `.gitignore` 排除，个人配置也应放在 `.local/` 下：
+
+```sh
+node plugins/epp/skills/schedule-practice/scripts/random-slots.mjs check \
+  --config plugins/epp/skills/schedule-practice/config.example.json \
+  --state .local/practice-schedule/state.json
+```
+
+再按以下规则在支持插件的 Codex 宿主中配置任务，完整操作、确认去重及暂停/恢复规则见 Skill；定时任务入口见 [Scheduled tasks 官方说明](https://learn.chatgpt.com/docs/automations?surface=app)。旧 v0.1.2 Release/ZIP 不含随机练习扩展，需要取得包含上述目录的最新源码并重新应用插件配置；更新源码不会自动更新旧附件、个人安装或启用任务。
 
 - 使用同一个练习对话。先手动确认 EPP 服务可达、当前对话能调用练习工具、已授予 `practice:read / practice:write`，且练习池材料允许发送到当前宿主；缺少条件时保持任务暂停。
 - 默认每天在北京时间 10:00–21:00 内每半小时检查一次，从中随机选择 3 或 4 个不同的时段，并保存当天计划。窗口不包含 21:00，最后候选为 20:30；重复检查沿用原计划，错过不集中补发。

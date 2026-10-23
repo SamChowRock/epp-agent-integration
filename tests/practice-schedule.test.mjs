@@ -204,13 +204,16 @@ test('does not follow state symlinks or silently regenerate malformed persisted 
   assert.deepEqual(f.state(), state);
 });
 
-test('CLI emits a JSON decision and rejects incomplete arguments without writing state', (t) => {
+test('repository command emits a JSON decision and CLI rejects incomplete arguments without writing state', (t) => {
   const f = fixture(t);
   const result = JSON.parse(
     execFileSync(
-      process.execPath,
-      [script, 'check', '--config', f.configPath, '--state', f.statePath],
-      { encoding: 'utf8' },
+      'npm',
+      [
+        'run', '--silent', 'practice:schedule', '--', 'check',
+        '--config', f.configPath, '--state', f.statePath,
+      ],
+      { cwd: fileURLToPath(new URL('..', import.meta.url)), encoding: 'utf8' },
     ),
   );
   assert.ok(['quiet', 'practice'].includes(result.action));

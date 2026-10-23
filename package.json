@@ -7,7 +7,12 @@
     "node": ">=24.19.0 <25"
   },
   "scripts": {
+    "plugin:configure": "node plugins/epp/scripts/apply-user-config.mjs",
+    "practice:schedule": "node plugins/epp/skills/schedule-practice/scripts/random-slots.mjs",
     "test": "node --test tests/*.test.mjs plugins/epp/tests/*.test.mjs",
+    "test:config": "node --test plugins/epp/tests/user-config.test.mjs",
+    "test:schedule": "node --test tests/practice-schedule.test.mjs",
+    "test:pack": "node --test tests/export-plugin.test.mjs",
     "pack": "node scripts/export-plugin.mjs"
   }
 }

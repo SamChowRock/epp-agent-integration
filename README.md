@@ -6,6 +6,24 @@
 
 本源码包含插件、记录/练习/随机练习三个 Skill、MCP 连接配置及配置脚本。EPP 核心和 MCP 服务端独立运行，源码不随包提供；安装插件不会安装 EPP 服务、创建账号或开放服务访问权。使用前需要管理员提供可访问的 EPP 服务、账号及已预登记的 OAuth 客户端。
 
+## 源码仓命令与目录
+
+在本仓根目录使用以下入口；无需安装 npm 依赖。
+
+| 命令 | 用途 |
+| --- | --- |
+| `npm run plugin:configure` | 应用个人连接配置并安装或更新本地插件 |
+| `npm run practice:schedule -- check ...` | 检查随机练习时段；`ack` 使用相同入口并传入提醒身份 |
+| `npm test` | 运行全部回归 |
+| `npm run test:config` | 配置、安装与失败恢复回归 |
+| `npm run test:schedule` | 随机练习状态与 CLI 回归 |
+| `npm run test:pack` | ZIP 内容及解压后的独立运行回归 |
+| `npm run pack` | 生成本地分发 ZIP，不发布 |
+
+脚本按作用范围归位：[仓库 scripts/](scripts/) 负责打包维护，[插件 scripts/](plugins/epp/scripts/) 负责插件配置，[Skill scripts/](plugins/epp/skills/schedule-practice/scripts/) 只服务对应 Skill。npm 命令直接调用这些脚本，不维护副本或额外转发脚本。新增脚本按同一规则维护，见[贡献说明](CONTRIBUTING.md)。
+
+分发 ZIP 不包含源码仓的 `package.json`；下载用户和已安装插件使用下文对应的直接 `node` 命令，操作说明随插件打包。
+
 ## 环境与验证范围
 
 - 安装脚本只使用 Node.js 内置模块，无需 pnpm、私有依赖或 EPP 源码仓库。
@@ -15,7 +33,7 @@
 
 ## 安装与配置
 
-下载并解压分发 ZIP，或取得完整公开源码目录；保留 `.agents`、`.codex-plugin` 和 `.mcp.json` 等隐藏文件。以下命令从分发根目录运行。
+下载并解压分发 ZIP，或取得完整公开源码目录；保留 `.agents`、`.codex-plugin` 和 `.mcp.json` 等隐藏文件。以下按源码仓与分发 ZIP 分别说明入口，均从各自根目录运行。
 
 1. 安装 Node.js 与支持插件命令的 Codex CLI。
 2. 在 `~/.codex/epp/user-config.json` 配置目标服务。已有文件请直接编辑并保留自己的配置；首次创建时可参照包内的 `plugins/epp/user-config.example.json`。未创建文件时，安装脚本会生成默认的 `http://localhost:3000` 配置。
@@ -30,7 +48,13 @@
 
 `serviceUrl` 接受 HTTPS 或本地回环 HTTP，路径为空、`/` 或 `/api/mcp`；不能包含用户名、密码、查询参数、片段或自定义路径前缀。`clientId`、`callbackPort` 可以省略，默认值如上；它们必须与目标服务的预登记信息一致。
 
-3. 应用配置并安装个人插件：
+3. 源码仓应用配置并安装个人插件：
+
+```sh
+npm run plugin:configure
+```
+
+分发 ZIP 解压后，从分发根目录运行：
 
 ```sh
 node plugins/epp/scripts/apply-user-config.mjs
@@ -71,10 +95,10 @@ OAuth 账号密码和令牌由宿主认证机制保存，不写入用户 JSON、
 }
 ```
 
-先用 Node.js 22 或更新版本运行本地检查；示例状态路径由公开根目录的 `.gitignore` 排除，个人配置也应放在 `.local/` 下：
+在源码仓使用 `package.json` 声明的 Node.js 版本运行本地检查；示例状态路径由仓库根目录的 `.gitignore` 排除，个人配置也应放在 `.local/` 下：
 
 ```sh
-node plugins/epp/skills/schedule-practice/scripts/random-slots.mjs check \
+npm run practice:schedule -- check \
   --config plugins/epp/skills/schedule-practice/config.example.json \
   --state .local/practice-schedule/state.json
 ```
@@ -98,7 +122,7 @@ node plugins/epp/skills/schedule-practice/scripts/random-slots.mjs check \
 ## 本地配置回归
 
 ```sh
-node --test plugins/epp/tests/user-config.test.mjs
+npm run test:config
 ```
 
 回归仅操作临时目录并模拟宿主命令，覆盖配置、升级、失败恢复及目录保护，不修改个人插件安装或业务数据。

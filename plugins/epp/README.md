@@ -4,6 +4,8 @@
 
 本源码包含插件、记录/练习/随机练习三个 Skill、MCP 连接配置及配置脚本。EPP 核心和 MCP 服务端独立运行，源码不随包提供；安装插件不会安装 EPP 服务、创建账号或开放服务访问权。使用前需要管理员提供可访问的 EPP 服务、账号及已预登记的 OAuth 客户端。
 
+本说明随分发 ZIP 提供，命令直接使用 Node.js，无需源码仓的 `package.json` 或 npm 依赖。维护源码时，统一命令入口见完整源码仓的根 README。
+
 ## 环境与验证范围
 
 - 安装脚本只使用 Node.js 内置模块，无需 pnpm、私有依赖或 EPP 源码仓库。
@@ -93,7 +95,7 @@ node plugins/epp/skills/schedule-practice/scripts/random-slots.mjs check \
 
 服务不可达时先核对服务是否运行和 URL 是否正确；授权失败时核对 clientId、精确回跳、账号及权限。连接恢复后用原业务身份查询事实，不将响应丢失解释为没有保存成功。不要把账号、令牌、原始材料或答案附在公开问题中。
 
-## 本地配置回归
+## 分发包配置回归
 
 ```sh
 node --test plugins/epp/tests/user-config.test.mjs

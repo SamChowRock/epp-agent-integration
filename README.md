@@ -1,6 +1,7 @@
 # EPP Agent Integration
 
 [![Platform: OpenAI Codex](https://img.shields.io/badge/platform-OpenAI%20Codex-000000)](https://developers.openai.com/plugins/build/plugins)
+[![豆包工作：个人试用](https://img.shields.io/badge/%E8%B1%86%E5%8C%85%E5%B7%A5%E4%BD%9C-%E4%B8%AA%E4%BA%BA%E8%AF%95%E7%94%A8-3370FF)](#豆包工作个人试用)
 [![Protocol: MCP](https://img.shields.io/badge/protocol-MCP-blue)](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)
 [![CI](https://github.com/SamChowRock/epp-agent-integration/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/SamChowRock/epp-agent-integration/actions/workflows/ci.yml?query=branch%3Amain)
 [![Plugin version (main)](https://img.shields.io/github/package-json/v/SamChowRock/epp-agent-integration/main?filename=plugins%2Fepp%2F.codex-plugin%2Fplugin.json&label=plugin)](https://github.com/SamChowRock/epp-agent-integration/blob/main/plugins/epp/.codex-plugin/plugin.json)

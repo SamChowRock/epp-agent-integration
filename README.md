@@ -19,6 +19,7 @@
 | 命令 | 用途 |
 | --- | --- |
 | `npm run plugin:configure` | 应用个人连接配置并安装或更新本地插件 |
+| `npm run doubao:prepare -- <配置 JSON> [输出目录]` | 准备豆包个人试用的本地 STDIO 连接配置与两份 Skill 包，不安装或授权 |
 | `npm run practice:schedule -- check ...` | 检查随机练习时段；`ack` 使用相同入口并传入提醒身份 |
 | `npm test` | 运行全部回归 |
 | `npm run test:config` | 配置、安装与失败恢复回归 |
@@ -87,6 +88,60 @@ OAuth 账号密码和令牌由宿主认证机制保存，不写入用户 JSON、
 - 恢复：“恢复我在 EPP 的这次记录或练习，先读取已保存状态。”保留服务返回的业务身份，未知结果先查询，不能换身份重复写入。
 
 需要选择已收录表达时，使用当前服务返回的 Web 星图入口。只有采纳的候选进入正式记录；向量待处理或失败不撤销已采纳事实。账号授权、工具许可和候选采纳是不同动作。
+
+## 豆包工作个人试用
+
+这是本地个人试用入口。本机已验证用户亲自授权、代理复用授权以及豆包连接器安装并启用；同版代理客户端发现 17 个工具。Skill 导入、豆包模型实际使用、记录和练习仍待验证。[豆包帮助中心](https://www.doubao.com/work/docs/zh-cn/articles/705018132598-plugins)支持个人添加 STDIO 插件，[技能帮助](https://www.doubao.com/work/docs/zh-cn/articles/081010973544-skills)支持上传技能文件或文件夹。无需先申请企业上架；这里不生成商店插件包，也不启用 Codex 专用随机练习。
+
+连接方式为豆包本地 STDIO → [mcp-remote](https://github.com/punkpeye/mcp-remote/tree/v0.15.2) → EPP HTTP MCP，代理固定使用 `0.15.2`，负责浏览器登录、S256、resource 和刷新。EPP 继续使用预登记 public client、既有 scope 与确认页，不修改 OAuth 服务，不开放公网服务。代理能力与本地配置检查不能代替豆包真实使用验收。
+
+从本源码仓运行，使用现有 Node.js 24 和可执行的 `npx`、`zip`。新建 `.local/doubao-user-config.json`（该目录已忽略），例如：
+
+```json
+{
+  "serviceUrl": "http://localhost:3000",
+  "clientId": "epp-doubao-local",
+  "callbackPort": 8769
+}
+```
+
+`serviceUrl` 必须与 EPP 实际 API origin 一致，不把 `localhost` 与 `127.0.0.1` 任意互换；URL 和端口沿用已有安全校验。客户端与端口默认如上，避免复用 Codex 授权身份。配置不能放入账号或令牌。
+
+```sh
+npm run doubao:prepare -- .local/doubao-user-config.json
+```
+
+默认生成目录为 `.local/doubao-trial/`，也可传第二个参数指定仓库外目录。macOS 的“文稿”等受保护目录可能使豆包启动脚本或读取配置时阻塞；本机已观察到移到临时目录后代理才能进入 OAuth。可从终端重新生成到个人配置目录，例如：
+
+```sh
+npm run doubao:prepare -- .local/doubao-user-config.json "$HOME/.config/epp/doubao-trial"
+```
+
+输出包含 `doubao-mcp.json`、`epp-client.json`、两份非秘密 OAuth 客户端 JSON、两个 Skill 文件夹及各自 ZIP。代理参数通过 `@绝对路径` 读取客户端 JSON，避免在宿主参数框嵌套带空格的 JSON；不要单独移动这些文件。生成过程不运行代理、安装软件、登记服务端客户端或打开登录页；已有目录会拒绝覆盖，保留其中可能已存在的凭据。输出目录须保持私有；临时目录仅用于诊断，不能作为长期运行位置。
+
+1. 让 EPP 管理员将 `epp-client.json` 作为一项加入 `MCP_OAUTH_CLIENTS`，保留其他客户端并按既有方式重启服务。默认精确回跳是 `http://localhost:8769/oauth/callback`，与 Codex 的 callback 路径不同；端口须空闲，固定端口被占用时停止处理。
+2. 在豆包工作的本地电脑模式中添加自定义 STDIO 插件，按 `doubao-mcp.json` 填写运行命令、完整参数和环境变量。该文件是配置参考，未验证豆包支持直接导入 JSON。`npx` 必须在宿主 PATH 可达；找不到时使用本机 `npx` 的实际绝对路径并配置 Node.js 所在 PATH。首次启动需要从 npm 下载指定版本代理。
+3. 代理打开 EPP 登录页后，由用户登录并核对五项记录/练习权限。令牌由代理保存在生成目录的 `auth/`，不进入参数、对话或源码；上游采用权限受限的本地明文文件，不使用 Codex 凭据存储。保持此目录私有，不上传或分享整个试用目录，也不开启代理 debug 日志。
+4. 在豆包技能页面分别上传生成的 `record-expressions`、`practice-expressions` 文件夹，或在实际入口支持时上传对应 ZIP。两份 Skill 原文直接来自共享源文件；个人导入不要求套用开发者商店的额外展示配置。
+5. 先发现完整授权下的 17 个工具，再用合成材料完成一次记录、用户亲自选择确认、查询采纳事实和一次练习；访问到期后的刷新、撤销与原身份恢复分别验证。只发现工具不能报告为记录或练习通过。
+
+本机豆包首次连接未等到人工登录完成就结束了代理。遇到这种情况，先在交互式终端使用同版代理自带客户端完成授权，再由豆包复用同一 `MCP_REMOTE_CONFIG_DIR`。以下命令对应上方 localhost、8769 和个人配置目录示例；服务 URL、resource、端口及文件路径必须与实际生成配置一致。HTTPS 服务不需要 `--allow-http`。
+
+```sh
+doubao_trial_dir="$HOME/.config/epp/doubao-trial"
+MCP_REMOTE_CONFIG_DIR="$doubao_trial_dir/auth" \
+  npx -y --package=mcp-remote@0.15.2 mcp-remote-client \
+  http://localhost:3000/api/mcp 8769 --host localhost --transport http-only \
+  --static-oauth-client-info "@$doubao_trial_dir/oauth-client-info.json" \
+  --static-oauth-client-metadata "@$doubao_trial_dir/oauth-client-metadata.json" \
+  --resource http://localhost:3000/api/mcp --allow-http --auth-timeout 600
+```
+
+该客户端只初始化连接并查询工具与资源列表，不调用记录或练习工具。保持终端输入打开，等待 `Tools` 和 `Exiting OK` 后再结束；仅有退出码 0 不证明工具列表已返回。随后在豆包中保存或重启原连接器，不复制令牌或新建授权身份。
+
+服务未启动、客户端未登记、豆包未安装/登录、浏览器回跳失败或宿主启动参数不兼容时，停在具体缺口，不改用手工 Bearer Token。切换账号、服务或客户端时先停止该 STDIO 连接并核对授权，不清理仍有代理进程使用的目录；已有试用目录不会被准备命令自动重建。
+
+本入口只在源码仓提供；现有 Codex 分发 ZIP 和安装配置保持原行为。商店上架另需符合[插件开发规范](https://open.doubao.com/document/doubao-developer-guide/plugin-development-specification)，其远程 HTTPS 限制不能直接套作本地 STDIO 代理的联网要求，也不能用本地试用结果承诺商店支持。
 
 
 ## Codex 随机练习配置

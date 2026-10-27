@@ -2,6 +2,7 @@
 
 [![Platform: OpenAI Codex](https://img.shields.io/badge/platform-OpenAI%20Codex-000000)](https://developers.openai.com/plugins/build/plugins)
 [![豆包工作：个人试用](https://img.shields.io/badge/%E8%B1%86%E5%8C%85%E5%B7%A5%E4%BD%9C-%E4%B8%AA%E4%BA%BA%E8%AF%95%E7%94%A8-3370FF)](#豆包工作个人试用)
+[![WorkBuddy：个人试用](https://img.shields.io/badge/WorkBuddy-%E4%B8%AA%E4%BA%BA%E8%AF%95%E7%94%A8-2B8A3E)](#workbuddy-个人试用)
 [![Protocol: MCP](https://img.shields.io/badge/protocol-MCP-blue)](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)
 [![CI](https://github.com/SamChowRock/epp-agent-integration/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/SamChowRock/epp-agent-integration/actions/workflows/ci.yml?query=branch%3Amain)
 [![Plugin version (main)](https://img.shields.io/github/package-json/v/SamChowRock/epp-agent-integration/main?filename=plugins%2Fepp%2F.codex-plugin%2Fplugin.json&label=plugin)](https://github.com/SamChowRock/epp-agent-integration/blob/main/plugins/epp/.codex-plugin/plugin.json)
@@ -21,6 +22,7 @@
 | --- | --- |
 | `npm run plugin:configure` | 应用个人连接配置并安装或更新本地插件 |
 | `npm run doubao:prepare -- <配置 JSON> [输出目录]` | 准备豆包个人试用的本地 STDIO 连接配置与两份 Skill 包，不安装或授权 |
+| `npm run workbuddy:prepare -- <配置 JSON> [输出目录]` | 准备 WorkBuddy 个人试用的独立连接配置与两份 Skill 包，不安装或授权 |
 | `npm run practice:schedule -- check ...` | 检查随机练习时段；`ack` 使用相同入口并传入提醒身份 |
 | `npm test` | 运行全部回归 |
 | `npm run test:config` | 配置、安装与失败恢复回归 |
@@ -36,7 +38,7 @@
 
 - 安装脚本只使用 Node.js 内置模块，无需 pnpm、私有依赖或 EPP 源码仓库。
 - 本地分发检查使用 Node.js 24.19.0；既有宿主接入证据使用 Codex CLI 0.162.0-alpha.17.2。升级宿主版本后须重新核对 OAuth 回跳兼容性。
-- 已有本地 CLI 记录、练习与恢复证据，以及插件 17 个工具发现证据；桌面实际使用、云端 ChatGPT 及生产服务仍待各自验证。配置回归使用模拟宿主命令，不连接真实账号或证明桌面闭环。
+- 已有本地 CLI 记录、练习与恢复证据，以及插件 17 个工具发现证据；Codex 桌面复查、云端 ChatGPT 及生产服务仍按各自范围验收。WorkBuddy 桌面个人试用的完整短句流程已验证，范围见下文。配置回归使用模拟宿主命令，不连接真实账号或证明桌面闭环。
 - 本分发不承诺通用公共插件目录收录或跨宿主兼容。它通过本地插件来源安装；目录布局参照 [OpenAI 插件文档](https://developers.openai.com/plugins/build/plugins)。
 
 ## 安装与配置
@@ -144,6 +146,42 @@ MCP_REMOTE_CONFIG_DIR="$doubao_trial_dir/auth" \
 
 本入口只在源码仓提供；现有 Codex 分发 ZIP 和安装配置保持原行为。商店上架另需符合[插件开发规范](https://open.doubao.com/document/doubao-developer-guide/plugin-development-specification)，其远程 HTTPS 限制不能直接套作本地 STDIO 代理的联网要求，也不能用本地试用结果承诺商店支持。
 
+
+## WorkBuddy 个人试用
+
+WorkBuddy 的[连接器说明](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Connector)支持自定义 MCP，[技能说明](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Skills-Market)支持上传技能包。这里沿用上节的 STDIO → `mcp-remote@0.15.2` → EPP HTTP MCP 路径；本机 5.8.3 已使用独立 OAuth 授权发现 17 个工具、加载两份 Skill，代理刷新和重启后恢复不需要重新授权。
+
+**当前验收边界：**隔离合成账号已用普通短句完成记录、系统浏览器确认页采纳、加入练习池、换题、原答案保存、评估和明确自评的完整流程；另有练习恢复、新出题和“好”不代选自评的验证，自评后没有自动开题。最新轮的页面采纳、答案和感受由用户明确委托助手模拟操作，不代表用户亲自输入或学习效果。宿主用户请求中没有提供工具名、业务身份或调用参数；此前人工编排轮与本轮证据分开记录。
+
+新建已忽略的 `.local/workbuddy-user-config.json`：
+
+```json
+{
+  "serviceUrl": "http://localhost:3000",
+  "clientId": "epp-workbuddy-local",
+  "callbackPort": 8771
+}
+```
+
+```sh
+npm run workbuddy:prepare -- .local/workbuddy-user-config.json "$HOME/.config/epp/workbuddy-trial"
+```
+
+省略输出目录时使用 `.local/workbuddy-trial/`。生成 `workbuddy-mcp.json`、`epp-client.json`、两份代理 OAuth JSON，以及与共享源文件内容一致的记录、练习 Skill 文件夹和 ZIP。已有目录拒绝覆盖；默认客户端和回跳端口独立于 Codex、豆包，凭据保存在本目录的 `auth/`，不能复制其他宿主的令牌。
+
+1. 按上节方法将客户端加入 EPP 的 `MCP_OAUTH_CLIENTS`，保留其他客户端；默认精确回跳为 `http://localhost:8771/oauth/callback`。
+2. 在 WorkBuddy 的“专家·技能·连接器 → 连接器 → 自定义连接器”打开 MCP 配置，保留已有服务器，加入生成文件的 `mcpServers.epp`。使用实际可执行的命令与 Node.js PATH；配置文件和代理脚本须在宿主可读取的稳定路径。
+3. 由用户核对 EPP 应用名及五项权限并授权。首次等待被宿主中断时，按上节交互式客户端方式预授权，换用本次服务、8771、WorkBuddy 文件路径及同一个独立凭据目录。
+4. 在“技能 → 添加技能 → 上传技能”分别上传两个 Skill 包；只上传 Skill ZIP 或对应文件夹，不上传包含授权凭据的整个试用目录。
+5. 分别核实宿主发现 17 个工具、两个 Skill 加载、合成记录与用户确认、练习、刷新、撤销与原身份恢复。准备脚本和代理工具发现不代表 WorkBuddy 业务验收完成；本入口不启用 Codex 随机练习。
+
+日常对话验收使用新对话和隔离合成账号，每轮只发普通用户会说的话：记录表达 → “收录” → 用户在确认页亲自选择 → “已采纳” → “练一下” → 英语答案 → “掌握了”或“还要练”。“好”不能被代选成自评。宿主须自行读取 Skill、取得工具返回的身份并完成保存；测试者若补充工具顺序、UUID、schema 或参数，该轮只能算人工编排。中断后用“继续刚才的练习”验证原答案和原尝试恢复，不能重新建题代替恢复。工具轨迹和只读服务检查用于核对事实，不放进用户请求充当提示。
+
+共享 Skill 已统一简短反馈、自评收尾与选题边界，保留参数完整性和有界恢复规则。采纳后要求练习会另行加入练习池，以工具成功结果为准，避免把“已收录”误报成“已加入”。更新后请新建对话，已有对话可能仍持有旧 Skill。真实宿主已覆盖只有一条可用表达时如实说明无法换题，以及有另一条表达时成功换题。现有工具从练习池选题，不能保证任意指定表达都能直接出题。
+
+候选提交曾因调用链路把必填的 `null` 改成空字符串而失败。EPP 服务端已调整 MCP 输入描述的互斥分支表示，保留原参数和业务校验；更新后真实宿主一次提交成功。该服务端兼容修复须与 Skill 一起使用，单独升级 Skill 不能修复传输值改写。尚未覆盖全部工具、撤销、真实向量和广泛语言质量；原生 OAuth 动态注册、商店连接器、专家包及生产部署不在本次个人试用范围内。
+
+候选确认优先使用系统浏览器，复用 EPP 授权时的登录状态。WorkBuddy 内置预览与系统浏览器的登录状态可能不同；本机同一确认链接在内置预览要求登录，在已登录的 Chrome 直接显示候选，不需要重新授权连接器。[官方打开方式](https://www.workbuddy.cn/docs/workbuddy/Conversation#打开对话中的链接)支持右键“在浏览器打开”，或按住 Command（macOS）/Ctrl（Windows）点击链接；本地链接可能仍默认在内置预览打开。两份 Skill 保留候选由用户亲自选择的要求。
 
 ## Codex 随机练习配置
 
